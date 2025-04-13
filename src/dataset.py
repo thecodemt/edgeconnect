@@ -7,10 +7,11 @@ import numpy as np
 import torchvision.transforms.functional as F
 from torch.utils.data import DataLoader
 from PIL import Image
-from scipy.misc import imread
+from imageio import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray, gray2rgb
 from .utils import create_mask
+from PIL import Image
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -99,7 +100,7 @@ class Dataset(torch.utils.data.Dataset):
             if sigma == 0:
                 sigma = random.randint(1, 4)
 
-            return canny(img, sigma=sigma, mask=mask).astype(np.float)
+            return canny(img, sigma=sigma, mask=mask).astype(np.float64)
 
         # external
         else:
@@ -146,7 +147,8 @@ class Dataset(torch.utils.data.Dataset):
         if mask_type == 6:
             mask = imread(self.mask_data[index])
             mask = self.resize(mask, imgh, imgw, centerCrop=False)
-            mask = rgb2gray(mask)
+            if len(mask.shape) == 3 and mask.shape[2] == 3:
+                mask = rgb2gray(mask)
             mask = (mask > 0).astype(np.uint8) * 255
             return mask
 
@@ -165,9 +167,15 @@ class Dataset(torch.utils.data.Dataset):
             i = (imgw - side) // 2
             img = img[j:j + side, i:i + side, ...]
 
-        img = scipy.misc.imresize(img, [height, width])
+        # 使用 Pillow 来调整大小
+        img_pil = Image.fromarray(img)
+        img_resized = img_pil.resize((width, height))
 
-        return img
+        # 转回 numpy 数组
+        img_resized = np.array(img_resized)
+    
+        return img_resized
+    
 
     def load_flist(self, flist):
         if isinstance(flist, list):

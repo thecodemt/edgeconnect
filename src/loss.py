@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
-
+from torchvision.models import vgg19, VGG19_Weights
 
 class AdversarialLoss(nn.Module):
     r"""
@@ -110,7 +110,7 @@ class PerceptualLoss(nn.Module):
 class VGG19(torch.nn.Module):
     def __init__(self):
         super(VGG19, self).__init__()
-        features = models.vgg19(pretrained=True).features
+        features = vgg19(weights=VGG19_Weights.DEFAULT).features
         self.relu1_1 = torch.nn.Sequential()
         self.relu1_2 = torch.nn.Sequential()
 
