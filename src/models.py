@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from .networks import InpaintGenerator, EdgeGenerator, Discriminator
 from .loss import AdversarialLoss, PerceptualLoss, StyleLoss
+import pickle
 
 
 class BaseModel(nn.Module):
@@ -22,9 +23,9 @@ class BaseModel(nn.Module):
             print('Loading %s generator...' % self.name)
 
             if torch.cuda.is_available():
-                data = torch.load(self.gen_weights_path)
+                data = torch.load(self.gen_weights_path, pickle_module=pickle)
             else:
-                data = torch.load(self.gen_weights_path, map_location=lambda storage, loc: storage)
+                data = torch.load(self.gen_weights_path, map_location='cpu', pickle_module=pickle)
 
             self.generator.load_state_dict(data['generator'])
             self.iteration = data['iteration']
