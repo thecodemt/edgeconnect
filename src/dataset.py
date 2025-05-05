@@ -3,11 +3,12 @@ import glob
 import scipy
 import torch
 import random
+import cv2
 import numpy as np
 import torchvision.transforms.functional as F
 from torch.utils.data import DataLoader
 from PIL import Image
-from scipy.misc import imread
+from imageio import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray, gray2rgb
 from .utils import create_mask
@@ -93,13 +94,13 @@ class Dataset(torch.utils.data.Dataset):
         if self.edge == 1:
             # no edge
             if sigma == -1:
-                return np.zeros(img.shape).astype(np.float)
+                return np.zeros(img.shape).astype(np.float64)
 
             # random sigma
             if sigma == 0:
                 sigma = random.randint(1, 4)
 
-            return canny(img, sigma=sigma, mask=mask).astype(np.float)
+            return canny(img, sigma=sigma, mask=mask).astype(np.float64)
 
         # external
         else:
@@ -146,7 +147,8 @@ class Dataset(torch.utils.data.Dataset):
         if mask_type == 6:
             mask = imread(self.mask_data[index])
             mask = self.resize(mask, imgh, imgw, centerCrop=False)
-            mask = rgb2gray(mask)
+            if len(mask.shape) == 3:  # (height, width, channels)
+                mask = rgb2gray(mask)  # 转换为灰度图像
             mask = (mask > 0).astype(np.uint8) * 255
             return mask
 
@@ -165,7 +167,7 @@ class Dataset(torch.utils.data.Dataset):
             i = (imgw - side) // 2
             img = img[j:j + side, i:i + side, ...]
 
-        img = scipy.misc.imresize(img, [height, width])
+        img = cv2.resize(img, (width, height))
 
         return img
 

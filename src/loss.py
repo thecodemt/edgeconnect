@@ -110,7 +110,7 @@ class PerceptualLoss(nn.Module):
 class VGG19(torch.nn.Module):
     def __init__(self):
         super(VGG19, self).__init__()
-        features = models.vgg19(pretrained=True).features
+        features = models.vgg19(weights=models.VGG19_Weights.DEFAULT).features
         self.relu1_1 = torch.nn.Sequential()
         self.relu1_2 = torch.nn.Sequential()
 
