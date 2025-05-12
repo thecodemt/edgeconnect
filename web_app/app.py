@@ -20,7 +20,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # 初始化模型
-config = Config('./places2/config.yml')
+config = Config('./celeba/config.yml')
 edge_model = EdgeModel(config)
 inpainting_model = InpaintingModel(config)
 
