@@ -99,12 +99,52 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 设置混合模式为source-over
         previewCtx.globalCompositeOperation = 'source-over';
-        
+
+        // 获取 maskCanvas 的图像数据
+        var imageData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+        var data = imageData.data;
+
+        // 遍历所有像素
+        for (var i = 0; i < data.length; i += 4) {
+            // 每个像素有四个值：R, G, B, A（红绿蓝透明度）
+            var r = data[i];     // 红色通道
+            var g = data[i + 1]; // 绿色通道
+            var b = data[i + 2]; // 蓝色通道
+
+            // 检查是否为黑色
+            if (r === 0 && g === 0 && b === 0) {
+                // 将黑色部分的透明度设置为 0（透明）
+                data[i + 3] = 0; // 设置 alpha 通道为 0
+            } else if (r === 255 && g === 255 && b === 255) {
+                // 将白色部分的透明度设置为 255（完全不透明）
+                data[i + 3] = 255; // 设置 alpha 通道为 255
+            }
+        }
+
+        // 将修改后的像素数据放回画布
+        maskCtx.putImageData(imageData, 0, 0);
+
+
         // 在遮罩区域绘制白色
         previewCtx.fillStyle = 'white';
-        previewCtx.globalAlpha = 0.5; // 设置透明度
         previewCtx.drawImage(maskCanvas, 0, 0);
-        previewCtx.globalAlpha = 1.0; // 重置透明度
+
+        // 遍历所有像素
+        for (var i = 0; i < data.length; i += 4) {
+            var a = data[i + 3];  // alpha 通道（透明度）
+
+            // 检查是否是透明像素
+            if (a === 0) {
+                // 如果是透明像素，将其变为黑色
+                data[i] = 0;     // 红色通道为黑色
+                data[i + 1] = 0; // 绿色通道为黑色
+                data[i + 2] = 0; // 蓝色通道为黑色
+                data[i + 3] = 255; // alpha 通道为 255（完全不透明）
+            }
+        }
+
+        // 将修改后的像素数据放回画布
+        maskCtx.putImageData(imageData, 0, 0);
         
         // 将预览效果绘制到主画布
         ctx.clearRect(0, 0, canvas.width, canvas.height);
