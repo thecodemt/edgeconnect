@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('drawingCanvas');          // 主画布，用于显示原图和遮罩预览
     const ctx = canvas.getContext('2d');                             // 主画布的绘图上下文
     const imageUpload = document.getElementById('imageUpload');      // 图像上传输入框
+    const maskUpload = document.getElementById('maskUpload');        // 遮罩上传输入框
     const brushSizeBtn = document.getElementById('brushSize');       // 画笔大小切换按钮
     const clearMaskBtn = document.getElementById('clearMask');       // 清除遮罩按钮
     const submitBtn = document.getElementById('submitBtn');          // 开始修复按钮
@@ -235,6 +236,44 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePreview();
     });
 
+    /**
+     * 加载遮罩图像
+     * @param {File} file - 要加载的遮罩图像文件
+     */
+    function loadMask(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // 调整遮罩画布大小
+                maskCanvas.width = canvas.width;
+                maskCanvas.height = canvas.height;
+                
+                // 清除遮罩画布
+                maskCtx.fillStyle = 'black';
+                maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                // 绘制遮罩图像
+                maskCtx.drawImage(img, 0, 0, maskCanvas.width, maskCanvas.height);
+                
+                // 更新遮罩预览
+                maskImage.src = maskCanvas.toDataURL('image/png');
+                
+                // 更新预览效果
+                updatePreview();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 遮罩上传事件处理
+    maskUpload.addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            loadMask(e.target.files[0]);
+        }
+    });
+
     // 提交修复请求
     submitBtn.addEventListener('click', async () => {
         if (!originalImageData) {
@@ -249,7 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 显示加载动画
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading';
-        loadingDiv.innerHTML = '<div class="spinner-border loading-spinner" role="status"></div>';
+        loadingDiv.innerHTML = `
+            <div class="spinner-border loading-spinner text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+        `;
         document.body.appendChild(loadingDiv);
 
         try {
@@ -258,26 +301,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
 
-            if (!response.ok) throw new Error('修复失败');
+            if (!response.ok) {
+                throw new Error('修复请求失败');
+            }
 
             const result = await response.json();
             if (result.success) {
                 resultImage.src = result.image;
                 downloadBtn.disabled = false;
             } else {
-                throw new Error(result.error || '修复失败');
+                alert('修复失败：' + result.error);
             }
         } catch (error) {
-            alert('修复失败：' + error.message);
+            alert('发生错误：' + error.message);
         } finally {
-            document.body.removeChild(loadingDiv);
+            loadingDiv.remove();
         }
     });
 
-    // 下载修复结果
+    // 下载结果
     downloadBtn.addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = '修复结果.png';
+        link.download = 'repaired_image.png';
         link.href = resultImage.src;
         link.click();
     });

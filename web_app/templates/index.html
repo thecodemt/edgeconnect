@@ -8,13 +8,13 @@
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid mt-4">
-        <h1 class="text-center mb-4">EdgeConnect 图像修复</h1>
+    <div class="container-fluid mt-3">
+        <h1 class="text-center mb-3">EdgeConnect 图像修复</h1>
         
-        <div class="row">
+        <div class="row g-3">
             <!-- 左侧：图像上传和遮罩绘制区域 -->
             <div class="col-md-8">
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">图像上传与遮罩绘制</h5>
                         <div class="btn-group" role="group">
@@ -23,9 +23,15 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label for="imageUpload" class="form-label">上传图像</label>
-                            <input type="file" class="form-control" id="imageUpload" accept="image/jpeg,image/png">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="imageUpload" class="form-label">上传图像</label>
+                                <input type="file" class="form-control" id="imageUpload" accept="image/jpeg,image/png">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maskUpload" class="form-label">上传遮罩（可选）</label>
+                                <input type="file" class="form-control" id="maskUpload" accept="image/png">
+                            </div>
                         </div>
                         <div class="canvas-wrapper">
                             <canvas id="drawingCanvas"></canvas>
