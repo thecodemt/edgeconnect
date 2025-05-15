@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 状态变量
     let isDrawing = false;                                          // 是否正在绘制遮罩
-    let brushSize = 20;                                             // 画笔大小（像素）
+    let brushSize = 5;                                             // 画笔大小（像素）
     let originalImageData = null;                                   // 原始图像数据
     let maskCanvas = document.createElement('canvas');              // 遮罩画布
     let maskCtx = maskCanvas.getContext('2d');                      // 遮罩画布的绘图上下文
@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let previewCtx = previewCanvas.getContext('2d');                // 预览画布的绘图上下文
     let currentImage = null;                                        // 当前加载的图像对象
     let imageScale = 1;                                             // 图像缩放比例
+
+    // 初始化画笔大小按钮文本
+    brushSizeBtn.textContent = `画笔大小: ${brushSize}px`;
 
     /**
      * 调整画布大小以适应图像
@@ -221,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 画笔大小切换
     brushSizeBtn.addEventListener('click', () => {
-        brushSize = brushSize === 20 ? 40 : 20;
+        brushSize = brushSize === 5 ? 10 : 5;
         brushSizeBtn.textContent = `画笔大小: ${brushSize}px`;
     });
 
