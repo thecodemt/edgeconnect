@@ -61,7 +61,7 @@ def process_image(image_path):
     if image is None:
         raise ValueError("无法读取图像文件")
         
-    image = resize_to_multiple_of_8(image)
+    image = cv2.resize(image, (512, 512))
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = feature.canny(gray_image, sigma=1.0)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -94,15 +94,15 @@ def inpaint():
         # 保存并处理输入图像
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'input.jpg')
         image_file.save(image_path)
+
+        # 获取原始图像大小
+        image=cv2.imread(image_path)
+        original_size = (image.shape[1], image.shape[0])
         
         # 处理图像和遮罩
         image, gray_image, edges = process_image(image_path)
         mask = preprocess_image(mask_data)
-        mask = resize_to_multiple_of_8(mask)
-        
-        # 确保图像和遮罩大小一致
-        if image.shape[:2] != mask.shape[:2]:
-            mask = cv2.resize(mask, (image.shape[1], image.shape[0]))
+        mask = cv2.resize(mask, (image.shape[1], image.shape[0]))
         
         # 处理遮罩
         mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
@@ -127,9 +127,11 @@ def inpaint():
         # 保存结果
         result_path = os.path.join(app.config['UPLOAD_FOLDER'], 'result.png')
         imsave(outputs_merged[0], result_path)
-        
+
         # 返回结果
         result = cv2.imread(result_path)
+        result = cv2.resize(result, original_size)
+        cv2.imwrite(result_path, result)
         _, buffer = cv2.imencode('.png', result)
         result_base64 = base64.b64encode(buffer).decode('utf-8')
         
