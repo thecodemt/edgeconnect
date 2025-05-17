@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearMaskBtn = document.getElementById('clearMask');       // 清除遮罩按钮
     const submitBtn = document.getElementById('submitBtn');          // 开始修复按钮
     const downloadBtn = document.getElementById('downloadBtn');      // 下载结果按钮
-    const originalImage = document.getElementById('originalImage');  // 原图预览
+    const edgeResult = document.getElementById('edgeResult');        // 边缘修复结果预览
     const maskImage = document.getElementById('maskImage');          // 遮罩预览
     const resultImage = document.getElementById('resultImage');      // 修复结果预览
 
@@ -310,7 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (result.success) {
-                resultImage.src = result.image;
+                edgeResult.src = result.edge_image;  // 显示边缘修复结果
+                resultImage.src = result.image;      // 显示最终修复结果
                 downloadBtn.disabled = false;
             } else {
                 alert('修复失败：' + result.error);

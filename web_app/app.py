@@ -157,10 +157,13 @@ def inpaint():
             outputs = inpainting_model(image_tensor, edges_tensor, mask_tensor)
             outputs_merged = (outputs * mask_tensor) + (image_tensor * (1 - mask_tensor))
             outputs_merged = (outputs_merged * 255.0).permute(0, 2, 3, 1).int()
+            edges_tensor = (edges_tensor * 255.0).permute(0,2,3,1).int()
             
         # 保存并返回结果
         result_path = os.path.join(app.config['UPLOAD_FOLDER'], 'result.png')
         imsave(outputs_merged[0], result_path)
+        edges_result_path = os.path.join(app.config['UPLOAD_FOLDER'], 'edges_result.png')
+        imsave(edges_tensor[0],edges_result_path)
 
         # 调整结果大小并编码
         result = cv2.imread(result_path)
@@ -168,10 +171,17 @@ def inpaint():
         cv2.imwrite(result_path, result)
         _, buffer = cv2.imencode('.png', result)
         result_base64 = base64.b64encode(buffer).decode('utf-8')
+
+        edges_result = cv2.imread(edges_result_path)
+        edges_result = cv2.resize(edges_result, original_size)
+        _, buffer = cv2.imencode('.png', edges_result)
+        edges_result_base64 = base64.b64encode(buffer).decode('utf-8')
+
         
         return jsonify({
             'success': True,
-            'image': f'data:image/png;base64,{result_base64}'
+            'image': f'data:image/png;base64,{result_base64}',
+            'edge_image': f'data:image/png;base64,{edges_result_base64}'
         })
         
     except Exception as e:
