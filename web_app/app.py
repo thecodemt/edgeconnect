@@ -157,7 +157,7 @@ def inpaint():
             outputs = inpainting_model(image_tensor, edges_tensor, mask_tensor)
             outputs_merged = (outputs * mask_tensor) + (image_tensor * (1 - mask_tensor))
             outputs_merged = (outputs_merged * 255.0).permute(0, 2, 3, 1).int()
-            edges_tensor = (edges_tensor * 255.0).permute(0,2,3,1).int()
+            edges_tensor = ((1-edges_tensor) * 255.0).permute(0,2,3,1).int()
             
         # 保存并返回结果
         result_path = os.path.join(app.config['UPLOAD_FOLDER'], 'result.png')
